@@ -1,0 +1,4 @@
+scikit-learn
+mlflow
+tensorflow==1.14
+flask_login

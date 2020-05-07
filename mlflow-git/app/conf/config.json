@@ -1,0 +1,7 @@
+{
+    "modelo": "LSTMModel",
+    "mlflow_api": "mlflow.sklearn",
+    "ruta_modelo_pkl": "/mlflow/app/models_file",
+    "run_controller": "TensorFlowController",
+    "build_model": "TensorFlowRun"
+}

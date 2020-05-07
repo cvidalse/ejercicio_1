@@ -1,0 +1,6 @@
+__pycache__
+mlruns
+models_file
+venv/
+venv
+.idea

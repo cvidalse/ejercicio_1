@@ -1,0 +1,23 @@
+FROM python:3.7.0-slim
+
+#USER root
+
+RUN apt update && apt install -y cron build-essential
+RUN pip install numpy cython
+RUN pip install scikit-learn mlflow Flask Flask-Cors python-crontab flask-login
+RUN pip install --upgrade tensorflow==1.14
+
+RUN mkdir /mlflow/
+
+COPY app/ /mlflow/app/
+WORKDIR /mlflow/app
+
+#COPY modelo/ /mlflow/app/modelo
+#RUN mkdir /mlflow/app/modelo/
+
+RUN python3 services/Cron_service.py
+
+RUN touch /var/log/cron.log
+
+#VOLUME ~/.local/lib/python3.5/site-packages:/usr/local/lib/python3.7/site-packages
+CMD python3 run_model.py && python3 run_controller.py && cron && python3 Servicio_prediccion.py

@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  mlflow-git:
+    build: 
+      context: ./mlflow-git
+      dockerfile: Dockerfile.pyslim
+    #user: root:root
+    #command: bash -c "git -C repositorio pull && python3 mlflow_run.py && python3 controller.py && cron && python3 Servicio_prediccion.py"
+    ports:
+      - 8091:8090
+    volumes:
+      - ./mlflow-git/app:/mlflow/app

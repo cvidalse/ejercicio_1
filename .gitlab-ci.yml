@@ -1,0 +1,35 @@
+image: docker:latest
+variables:
+  DOCKER_DRIVER: overlay2
+
+services:
+  - docker:dind
+before_script:
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+stages:
+  - build
+  - deploy
+build:
+  stage: build
+  script:
+     - cd mlflow-git
+     - docker build -t $CI_REGISTRY_IMAGE:latest -f Dockerfile.pyslim .
+     - docker push $CI_REGISTRY_IMAGE:latest
+  tags:
+    - docker
+deploy:
+  stage: deploy
+  script:
+    ###### Login to deployment server using SSH #####
+    - mkdir -p ~/.ssh
+    - echo "$DEV_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
+    - ssh-keyscan -H $DEV_IP >> ~/.ssh/known_hosts  
+    ###### Pull the registry to deployment server and recereate the docker service #####    
+    - scp $DOCKER_COMPOSE_FILE_NAME $DEV_USER@$DEV_IP:$DOCKER_COMPOSE_FILE_NAME
+    - ssh $DEV_USER@$DEV_IP "docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY;docker stop diufro_container;docker rm diufro_container;docker rmi $CI_REGISTRY_IMAGE;docker build --pull -t $CI_REGISTRY_IMAGE:latest .; docker run -p 8091:8090 --detach --name diufro_container $CI_REGISTRY_IMAGE:latest"
+  tags:
+    - docker
