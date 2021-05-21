@@ -1,4 +1,4 @@
 scikit-learn
 mlflow
-tensorflow==1.14
+tensorflow==2.5.0
 flask_login
